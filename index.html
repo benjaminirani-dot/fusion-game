@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mini Fusion Game</title>
+<style>
+  body { font-family: Arial; text-align: center; background: #222; color: white; margin: 0; padding: 20px; }
+  #elements { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin: 30px 0; }
+  .item { width: 80px; height: 80px; background: #444; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: grab; user-select: none; font-size: 40px; }
+  .item:active { cursor: grabbing; }
+  #dropzone { width: 200px; height: 200px; border: 4px dashed #666; border-radius: 50%; margin: 40px auto; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s; }
+  .active { border-color: #0f0; background: rgba(0,255,0,0.1); transform: scale(1.1); }
+  #result { font-size: 28px; min-height: 50px; margin-top: 20px; }
+  button { background: #4a90e2; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-size: 16px; margin: 10px; }
+</style>
+</head>
+<body>
+
+<h1>🔬 Mini Fusion Lab</h1>
+<p>Drag <strong>TWO</strong> items onto the circle to fuse!</p>
+
+<div id="elements">
+  <div class="item" draggable="true" data-name="water">💧</div>
+  <div class="item" draggable="true" data-name="fire">🔥</div>
+  <div class="item" draggable="true" data-name="earth">🌍</div>
+  <div class="item" draggable="true" data-name="air">💨</div>
+</div>
+
+<div id="dropzone">Drop 2 items here 👇</div>
+<div id="result">Try water + fire!</div>
+<button onclick="clearFusion()">🔄 New Try</button>
+
+<script>
+// Fusion recipes - add more here!
+const recipes = {
+  "air+earth": "🌫️ Dust",
+  "air+fire": "⚡ Energy", 
+  "air+water": "🌧️ Rain",
+  "earth+fire": "🌋 Lava",
+  "earth+water": "🌱 Plant",
+  "fire+water": "💨 Steam",
+  "lava+water": "🪨 Stone",
+  "plant+fire": "💨 Smoke",
+  "rain+earth": "🌾 Swamp",
+  "steam+air": "☁️ Cloud"
+};
+
+let draggedItems = [];
+
+document.querySelectorAll('.item').forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text', item.dataset.name);
+    item.style.opacity = '0.5';
+  });
+  item.addEventListener('dragend', () => {
+    item.style.opacity = '1';
+  });
+});
+
+const dropzone = document.getElementById('dropzone');
+const resultDiv = document.getElementById('result');
+
+dropzone.addEventListener('dragover', e => e.preventDefault());
+dropzone.addEventListener('dragenter', () => dropzone.classList.add('active'));
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('active'));
+
+dropzone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropzone.classList.remove('active');
+  
+  const name = e.dataTransfer.getData('text');
+  if (name && draggedItems.length < 2) {
+    draggedItems.push(name);
+    dropzone.textContent = `Got ${draggedItems.length}/2`;
+    
+    if (draggedItems.length === 2) {
+      const [a, b] = draggedItems.sort();
+      const key = a + '+' + b;
+      const result = recipes[key] || "❓ Mystery! Try another combo";
+      
+      resultDiv.innerHTML = `${draggedItems[0]} + ${draggedItems[1]} = ${result}`;
+      dropzone.textContent = 'FUSED! 🎉';
+    }
+  }
+});
+
+function clearFusion() {
+  draggedItems = [];
+  dropzone.textContent = 'Drop 2 items here 👇';
+  resultDiv.textContent = 'Ready for next fusion!';
+  dropzone.classList.remove('active');
+}
+</script>
+
+</body>
+</html>
